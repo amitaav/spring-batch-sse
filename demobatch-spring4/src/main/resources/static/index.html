@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>demo-batch-and-sse</title>
+</head>
+<body>
+<div>
+	<a href="javascript:void" onclick="sendRequest()">Send Request</a>
+	</br>
+    <ul id="data"></ul>
+</div>
+<script type="application/javascript">
+
+	function sendRequest(sender){
+	   if (!!window.EventSource) {
+		    var eventSource = new EventSource("/sse/batchdata");
+	        var elements = document.getElementById("data");
+
+	        function addMessage(message) {
+	            var element = document.createElement("li");
+	            element.innerHTML = message;
+	            elements.appendChild(element);
+	        }
+
+	        eventSource.onmessage = function (e) {
+	            console.log(e.data);
+	            
+	            addMessage(e.data);
+	        };
+
+	        eventSource.onopen = function (e) {
+	            addMessage('Connection was opened');
+	        };
+
+	        eventSource.onerror = function (e) {
+	            if (e.readyState == EventSource.CONNECTING) {
+	            	addMessage('event: CONNECTING');
+	            } else if (e.readyState == EventSource.OPEN) {
+	            	addMessage('event: OPEN');
+	            } else if (e.readyState == EventSource.CLOSING) {
+	            	addMessage('event: CLOSING');
+	                //do not retry if closing
+	                eventSource.close();
+	            } else if (e.readyState == EventSource.CLOSED) {
+	            	addMessage('event: CLOSED');                
+	            }
+	        };
+	    } else {
+	        alert('The browser does not support Server-Sent Events');
+	    }
+	}
+
+ 
+
+</script>
+</body>
+</html>
